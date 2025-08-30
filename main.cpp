@@ -7,15 +7,24 @@ int main() {
     InitWindow(896, 512, "PerVis");
 
     PerlingTexture perlinTexture(128, 128);
-    Rectangle src = { 0, 0, (float) perlinTexture.texture.width, (float) perlinTexture.texture.height },
+    perlinTexture.offset = {
+        (float) GetRandomValue(-9999, 9999),
+        (float) GetRandomValue(-9999, 9999)
+    };
+    Rectangle src = {
+        0,
+        0,
+        (float) perlinTexture.texture.width,
+        (float) perlinTexture.texture.height
+    },
     dest = {
         GetScreenWidth()/2.0f - GetScreenHeight()/2.0f,
         0,
         (float) GetScreenHeight(),
         (float) GetScreenHeight()
     };
-    int offsetSpeed = 25;
-    int scrollSpeed = 400;
+    float offsetSpeed = 20,
+    scrollSpeed = 400;
     printf("Texture size: width %d, height %d\n", perlinTexture.texture.width, perlinTexture.texture.height);
 
     while(!WindowShouldClose()) {
@@ -24,11 +33,13 @@ int main() {
             DrawTexturePro(perlinTexture.texture, src, dest, { 0, 0 }, 0, WHITE);
             DrawText(
                 "Controls\n"
-                "A-W-S-D to move\n"
-                "Mouse scoll to zoom\n"
+                "A-W-S-D: move\n"
+                "Mouse scoll: zoom\n"
+                "R: re-generate noise\n"
                 "Red: high points\n"
+                "Green: mid points\n"
                 "Blue: deep points",
-                16, 16, 24, WHITE
+                16, 16, 16, WHITE
             );
         EndDrawing();
 
@@ -59,8 +70,19 @@ int main() {
         float mouseWheel = GetMouseWheelMove();
         perlinTexture.scale -= mouseWheel*scrollSpeed*deltaTime;
         perlinTexture.scale = Clamp(perlinTexture.scale, 0, 100);
+        offsetSpeed = perlinTexture.scale;
 
-        printf("Scale: %2.f\n", perlinTexture.scale);
+        printf("Scale: %f\n", perlinTexture.scale);
+
+        // Completely re generate noise
+        if (IsKeyPressed(KEY_R)) {
+            perlinTexture.offset = {
+                (float) GetRandomValue(-9999, 9999),
+                (float) GetRandomValue(-9999, 9999)
+            };
+
+            printf("Noise re generated\n");
+        }
 
         // Re generate noise
         perlinTexture.generate();
